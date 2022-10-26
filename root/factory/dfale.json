@@ -1,0 +1,9 @@
+{
+	"name": "dfale",
+	"location": "brazilsouth",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "b09f2c92-0189-4a80-ad67-c7833948d089",
+		"tenantId": "a447b9c2-a213-4ec1-8103-3ea69a516a59"
+	}
+}

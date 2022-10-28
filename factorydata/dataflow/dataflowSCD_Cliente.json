@@ -19,7 +19,15 @@
 					"name": "ExistingDimCliente"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable_DimCliente",
+						"type": "DatasetReference"
+					},
+					"name": "sinkDimClienteCambios"
+				}
+			],
 			"transformations": [
 				{
 					"name": "derivedColumnHash"
@@ -32,6 +40,15 @@
 				},
 				{
 					"name": "lookupNuevosCambios"
+				},
+				{
+					"name": "conditionalSplitEsNuevo"
+				},
+				{
+					"name": "alterRowInsert"
+				},
+				{
+					"name": "alterRowUpdate"
 				}
 			],
 			"scriptLines": [
@@ -55,16 +72,37 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> ExistingDimCliente",
-				"SourceSTGCliente derive(SourceHash = sha2(256,cod_cliente, Nombre, Apellido, id_localidad)) ~> derivedColumnHash",
-				"derivedColumnHash, derivedColumnExisting exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"SourceSTGCliente derive(SourceHash = sha2(256,cod_cliente, Nombre, Apellido, id_localidad),",
+				"          cod_cliente_int = toInteger(cod_cliente)) ~> derivedColumnHash",
+				"derivedColumnHash, derivedColumnExisting exists(cod_cliente_int == ExistingDimCliente@Cod_Cliente,",
 				"     negate:true,",
 				"     broadcast: 'auto')~> existsSTGvsSQL",
-				"ExistingDimCliente derive(existingHash = sha2(256,Cod_Cliente, Nombre_Cliente, Apellido_Cliente, Cod_Localidad),",
-				"          cod_cliente_int = toInteger(Cod_Cliente)) ~> derivedColumnExisting",
-				"existsSTGvsSQL, derivedColumnExisting lookup(SourceSTGCliente@cod_cliente == ExistingDimCliente@Cod_Cliente,",
+				"ExistingDimCliente derive(existingHash = sha2(256,Cod_Cliente, Nombre_Cliente, Apellido_Cliente, Cod_Localidad)) ~> derivedColumnExisting",
+				"existsSTGvsSQL, derivedColumnExisting lookup(cod_cliente_int == ExistingDimCliente@Cod_Cliente,",
 				"     multiple: false,",
 				"     pickup: 'any',",
-				"     broadcast: 'auto')~> lookupNuevosCambios"
+				"     broadcast: 'auto')~> lookupNuevosCambios",
+				"lookupNuevosCambios split(isNull(ExistingDimCliente@Cod_Cliente),",
+				"     disjoint: false) ~> conditionalSplitEsNuevo@(Esnuevo, EsModificado)",
+				"conditionalSplitEsNuevo@Esnuevo alterRow(insertIf(1 == 1)) ~> alterRowInsert",
+				"conditionalSplitEsNuevo@EsModificado alterRow(updateIf(1 ==1)) ~> alterRowUpdate",
+				"alterRowUpdate sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Cod_Cliente as integer,",
+				"          Nombre_Cliente as string,",
+				"          Apellido_Cliente as string,",
+				"          Cod_Localidad as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['cod_cliente'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkDimClienteCambios"
 			]
 		}
 	}

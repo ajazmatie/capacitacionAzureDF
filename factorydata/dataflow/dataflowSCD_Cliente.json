@@ -59,8 +59,9 @@
 				"derivedColumnHash, derivedColumnExisting exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
 				"     negate:true,",
 				"     broadcast: 'auto')~> existsSTGvsSQL",
-				"ExistingDimCliente derive(existingHash = sha2(256,Cod_Cliente, Nombre_Cliente, Apellido_Cliente, Cod_Localidad)) ~> derivedColumnExisting",
-				"existsSTGvsSQL lookup(cod_cliente == ERROR_FUNCTION(''),",
+				"ExistingDimCliente derive(existingHash = sha2(256,Cod_Cliente, Nombre_Cliente, Apellido_Cliente, Cod_Localidad),",
+				"          cod_cliente_int = toInteger(Cod_Cliente)) ~> derivedColumnExisting",
+				"existsSTGvsSQL, derivedColumnExisting lookup(SourceSTGCliente@cod_cliente == ExistingDimCliente@Cod_Cliente,",
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookupNuevosCambios"

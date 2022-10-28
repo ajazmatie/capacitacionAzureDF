@@ -1,0 +1,19 @@
+{
+	"name": "Cliente_stg",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "archivos-stg-jazmatie"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}

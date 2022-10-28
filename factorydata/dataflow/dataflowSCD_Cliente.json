@@ -1,0 +1,70 @@
+{
+	"name": "dataflowSCD_Cliente",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Parquet_Cliente_stg",
+						"type": "DatasetReference"
+					},
+					"name": "SourceSTGCliente"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable_DimCliente",
+						"type": "DatasetReference"
+					},
+					"name": "ExistingDimCliente"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "derivedColumnHash"
+				},
+				{
+					"name": "existsSTGvsSQL"
+				},
+				{
+					"name": "derivedColumnExisting"
+				},
+				{
+					"name": "lookupNuevosCambios"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          cod_cliente as string,",
+				"          Nombre as string,",
+				"          Apellido as string,",
+				"          id_localidad as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> SourceSTGCliente",
+				"source(output(",
+				"          Cod_Cliente as integer,",
+				"          Nombre_Cliente as string,",
+				"          Apellido_Cliente as string,",
+				"          Cod_Localidad as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> ExistingDimCliente",
+				"SourceSTGCliente derive(SourceHash = sha2(256,cod_cliente, Nombre, Apellido, id_localidad)) ~> derivedColumnHash",
+				"derivedColumnHash, derivedColumnExisting exists(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     negate:true,",
+				"     broadcast: 'auto')~> existsSTGvsSQL",
+				"ExistingDimCliente derive(existingHash = sha2(256,Cod_Cliente, Nombre_Cliente, Apellido_Cliente, Cod_Localidad)) ~> derivedColumnExisting",
+				"existsSTGvsSQL lookup(cod_cliente == ERROR_FUNCTION(''),",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookupNuevosCambios"
+			]
+		}
+	}
+}

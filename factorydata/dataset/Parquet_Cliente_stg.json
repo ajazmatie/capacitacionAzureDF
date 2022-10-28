@@ -1,5 +1,5 @@
 {
-	"name": "Cliente_stg",
+	"name": "Parquet_Cliente_stg",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",

@@ -108,7 +108,13 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sinkDimCliente",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          Cod_Cliente = cod_cliente_int,",
+				"          Nombre_Cliente,",
+				"          Apellido_Cliente,",
+				"          Cod_Localidad",
+				"     )) ~> sinkDimCliente",
 				"alterRowUpdate sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -121,11 +127,17 @@
 				"     insertable:false,",
 				"     updateable:true,",
 				"     upsertable:false,",
-				"     keys:['cod_cliente'],",
+				"     keys:['Cod_Cliente'],",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sinkDimClienteCambios"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          Cod_Cliente = cod_cliente_int,",
+				"          Nombre_Cliente,",
+				"          Apellido_Cliente,",
+				"          Cod_Localidad",
+				"     )) ~> sinkDimClienteCambios"
 			]
 		}
 	}

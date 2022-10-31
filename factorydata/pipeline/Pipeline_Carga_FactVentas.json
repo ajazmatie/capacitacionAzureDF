@@ -51,16 +51,37 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Set variableProceso",
+							"name": "Set variable_ProcesoActual",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "idProceso_Actual",
-								"value": {
-									"value": "string(@item().id_Proceso)",
-									"type": "Expression"
+								"value": "string(@item().id_proceso)"
+							}
+						},
+						{
+							"name": "SP_ActualizaEstado_Iniciado",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Set variable_ProcesoActual",
+									"dependencyConditions": [
+										"Succeeded"
+									]
 								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "dbale",
+								"type": "LinkedServiceReference"
 							}
 						}
 					]

@@ -25,13 +25,6 @@
 						"referenceName": "AzureSqlTable_DimCliente",
 						"type": "DatasetReference"
 					},
-					"name": "sinkDimClienteCambios"
-				},
-				{
-					"dataset": {
-						"referenceName": "AzureSqlTable_DimCliente",
-						"type": "DatasetReference"
-					},
 					"name": "sinkDimCliente"
 				}
 			],
@@ -93,23 +86,6 @@
 				"     disjoint: false) ~> conditionalSplitEsNuevo@(Esnuevo, EsModificado)",
 				"conditionalSplitEsNuevo@Esnuevo alterRow(insertIf(1==1)) ~> alterRowInsert",
 				"conditionalSplitEsNuevo@EsModificado alterRow(updateIf(1==1)) ~> alterRowUpdate",
-				"alterRowUpdate sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     input(",
-				"          Cod_Cliente as integer,",
-				"          Nombre_Cliente as string,",
-				"          Apellido_Cliente as string,",
-				"          Cod_Localidad as integer",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:false,",
-				"     updateable:true,",
-				"     upsertable:false,",
-				"     keys:['cod_cliente'],",
-				"     format: 'table',",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sinkDimClienteCambios",
 				"alterRowInsert sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",

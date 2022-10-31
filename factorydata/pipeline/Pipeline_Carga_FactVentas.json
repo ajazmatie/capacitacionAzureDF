@@ -79,9 +79,171 @@
 								"secureInput": false
 							},
 							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[Sp_Actualiza_Estado_Proceso]",
+								"storedProcedureParameters": {
+									"estado": {
+										"value": "1",
+										"type": "Int32"
+									},
+									"modulo": {
+										"value": "@item().modulo",
+										"type": "String"
+									},
+									"Proceso_ID": {
+										"value": "@item().id_proceso",
+										"type": "Int32"
+									}
+								}
+							},
 							"linkedServiceName": {
-								"referenceName": "dbale",
+								"referenceName": "AzureSqlDatabase1",
 								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Copy_Data_STG_Ventas",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "SP_ActualizaEstado_Iniciado",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "cod_tiempo",
+												"type": "Int32",
+												"physicalType": "int"
+											},
+											"sink": {
+												"name": "cod_tiempo",
+												"type": "Int32",
+												"physicalType": "INT_32"
+											}
+										},
+										{
+											"source": {
+												"name": "cod_vendedor",
+												"type": "Int32",
+												"physicalType": "int"
+											},
+											"sink": {
+												"name": "cod_vendedor",
+												"type": "Int32",
+												"physicalType": "INT_32"
+											}
+										},
+										{
+											"source": {
+												"name": "cod_cliente",
+												"type": "Int32",
+												"physicalType": "int"
+											},
+											"sink": {
+												"name": "cod_cliente",
+												"type": "Int32",
+												"physicalType": "INT_32"
+											}
+										},
+										{
+											"source": {
+												"name": "cod_producto",
+												"type": "Int32",
+												"physicalType": "int"
+											},
+											"sink": {
+												"name": "cod_producto",
+												"type": "Int32",
+												"physicalType": "INT_32"
+											}
+										},
+										{
+											"source": {
+												"name": "cantidad",
+												"type": "Int32",
+												"physicalType": "int"
+											},
+											"sink": {
+												"name": "cantidad",
+												"type": "Int32",
+												"physicalType": "INT_32"
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "AzureSql_Ventas",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "Parquet_STG_Ventas",
+									"type": "DatasetReference"
+								}
+							]
+						},
+						{
+							"name": "DataFlow_STG_FactVentas_STG",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [
+								{
+									"activity": "Copy_Data_STG_Ventas",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"compute": {
+									"coreCount": 8,
+									"computeType": "General"
+								},
+								"traceLevel": "Fine"
 							}
 						}
 					]

@@ -17,13 +17,18 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT [modulo], [fecha_desde_procesada],\n[fecha_hasta_procesada], [fecha_inicio_ejecucion],\n[fecha_fin_ejecucion], [estado]\nFROM [dbo].[DW_Procesos]\nWHERE [modulo] = 'Ventas' AND [estado] = 0",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "AzureSql_Procesos",
 						"type": "DatasetReference"
-					}
+					},
+					"firstRowOnly": false
 				}
 			}
 		],

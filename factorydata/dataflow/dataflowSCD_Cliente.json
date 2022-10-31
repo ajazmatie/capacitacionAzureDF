@@ -5,33 +5,17 @@
 		"typeProperties": {
 			"sources": [
 				{
-					"dataset": {
-						"referenceName": "Parquet_Cliente_stg",
-						"type": "DatasetReference"
-					},
 					"name": "SourceSTGCliente"
 				},
 				{
-					"dataset": {
-						"referenceName": "AzureSqlTable_DimCliente",
-						"type": "DatasetReference"
-					},
 					"name": "ExistingDimCliente"
 				}
 			],
 			"sinks": [
 				{
-					"dataset": {
-						"referenceName": "AzureSqlTable_DimCliente",
-						"type": "DatasetReference"
-					},
 					"name": "sinkDimCliente"
 				},
 				{
-					"dataset": {
-						"referenceName": "AzureSqlTable_DimCliente",
-						"type": "DatasetReference"
-					},
 					"name": "sinkDimClienteCambios"
 				}
 			],
@@ -66,9 +50,7 @@
 				"          id_localidad as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false,",
-				"     format: 'parquet') ~> SourceSTGCliente",
+				"     validateSchema: false) ~> SourceSTGCliente",
 				"source(output(",
 				"          Cod_Cliente as integer,",
 				"          Nombre_Cliente as string,",
@@ -76,9 +58,7 @@
 				"          Cod_Localidad as integer",
 				"     ),",
 				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> ExistingDimCliente",
+				"     validateSchema: false) ~> ExistingDimCliente",
 				"SourceSTGCliente derive(SourceHash = sha2(256,cod_cliente, Nombre, Apellido, id_localidad),",
 				"          cod_cliente_int = toInteger(cod_cliente)) ~> derivedColumnHash",
 				"derivedColumnHash, derivedColumnExisting exists(cod_cliente_int == ExistingDimCliente@Cod_Cliente,",
@@ -95,37 +75,14 @@
 				"conditionalSplitEsNuevo@EsModificado alterRow(updateIf(1==1)) ~> alterRowUpdate",
 				"alterRowInsert sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     input(",
-				"          Cod_Cliente as integer,",
-				"          Nombre_Cliente as string,",
-				"          Apellido_Cliente as string,",
-				"          Cod_Localidad as integer",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sinkDimCliente",
+				"     format: 'table') ~> sinkDimCliente",
 				"alterRowUpdate sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     input(",
-				"          Cod_Cliente as integer,",
-				"          Nombre_Cliente as string,",
-				"          Apellido_Cliente as string,",
-				"          Cod_Localidad as integer",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:false,",
-				"     updateable:true,",
-				"     upsertable:false,",
-				"     keys:['cod_cliente'],",
-				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sinkDimClienteCambios"
+				"     format: 'table') ~> sinkDimClienteCambios"
 			]
 		}
 	}

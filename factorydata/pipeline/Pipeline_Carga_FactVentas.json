@@ -30,8 +30,49 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "ForEach_Proceso",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup_Procesos",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup_Procesos').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Set variableProceso",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "idProceso_Actual",
+								"value": {
+									"value": "string(@item().id_Proceso)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
 			}
 		],
+		"variables": {
+			"idProceso_Actual": {
+				"type": "String",
+				"defaultValue": "\"0\""
+			}
+		},
 		"annotations": []
 	}
 }

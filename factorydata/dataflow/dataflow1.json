@@ -1,0 +1,51 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Parquet_STG_Ventas",
+						"type": "DatasetReference"
+					},
+					"name": "SourceParquetVentas"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlCliente",
+						"type": "DatasetReference"
+					},
+					"name": "SourceDimCliente"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "LookUpCliente",
+					"description": "Búsqueda en \"SourceParquetVentas\" desde \"SourceDimCliente\""
+				}
+			],
+			"scriptLines": [
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> SourceParquetVentas",
+				"source(output(",
+				"          Cod_Cliente as integer,",
+				"          Nombre_Cliente as string,",
+				"          Apellido_Cliente as string,",
+				"          Cod_Localidad as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> SourceDimCliente",
+				"SourceParquetVentas, SourceDimCliente lookup(ERROR_FUNCTION('') == Cod_Cliente,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> LookUpCliente"
+			]
+		}
+	}
+}

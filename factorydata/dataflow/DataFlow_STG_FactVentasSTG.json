@@ -1,5 +1,5 @@
 {
-	"name": "dataflow1",
+	"name": "DataFlow_STG_FactVentasSTG",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -20,12 +20,7 @@
 				}
 			],
 			"sinks": [],
-			"transformations": [
-				{
-					"name": "LookUpCliente",
-					"description": "Búsqueda en \"SourceParquetVentas\" desde \"SourceDimCliente\""
-				}
-			],
+			"transformations": [],
 			"scriptLines": [
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -40,11 +35,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> SourceDimCliente",
-				"SourceParquetVentas, SourceDimCliente lookup(ERROR_FUNCTION('') == Cod_Cliente,",
-				"     multiple: false,",
-				"     pickup: 'any',",
-				"     broadcast: 'auto')~> LookUpCliente"
+				"     format: 'table') ~> SourceDimCliente"
 			]
 		}
 	}

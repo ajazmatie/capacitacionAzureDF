@@ -10,7 +10,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "ventas_stg",
 				"fileSystem": "archivos-stg-jazmatie"
 			},
 			"compressionCodec": "snappy"

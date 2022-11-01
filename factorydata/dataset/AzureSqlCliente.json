@@ -2,7 +2,7 @@
 	"name": "AzureSqlCliente",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "AzureSqlDatabase1",
+			"referenceName": "dbale",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],

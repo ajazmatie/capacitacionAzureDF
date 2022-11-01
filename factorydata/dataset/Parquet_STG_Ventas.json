@@ -10,6 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.SOURCE_Ventas.parquet",
 				"fileSystem": "archivos-stg-jazmatie"
 			},
 			"compressionCodec": "snappy"

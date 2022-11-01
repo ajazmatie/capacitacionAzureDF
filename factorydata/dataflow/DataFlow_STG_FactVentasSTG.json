@@ -9,24 +9,65 @@
 						"referenceName": "Parquet_STG_Ventas",
 						"type": "DatasetReference"
 					},
-					"name": "source1"
+					"name": "sourceParquetVentas"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlCliente",
+						"type": "DatasetReference"
+					},
+					"name": "SourceDimCliente"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Parquet_STG_FactVentas",
+						"type": "DatasetReference"
+					},
+					"name": "SinkSTGFactVentas"
+				}
+			],
 			"transformations": [
 				{
-					"name": "lookup1"
+					"name": "lookupCliente"
 				}
 			],
 			"scriptLines": [
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     format: 'parquet') ~> source1",
-				"source1 lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     format: 'parquet') ~> sourceParquetVentas",
+				"source(output(",
+				"          Cod_Cliente as integer,",
+				"          Nombre_Cliente as string,",
+				"          Apellido_Cliente as string,",
+				"          Cod_Localidad as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> SourceDimCliente",
+				"sourceParquetVentas, SourceDimCliente lookup(ERROR_FUNCTION('') == Cod_Cliente,",
 				"     multiple: false,",
 				"     pickup: 'any',",
-				"     broadcast: 'auto')~> lookup1"
+				"     broadcast: 'auto')~> lookupCliente",
+				"lookupCliente sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          cod_cliente as string,",
+				"          Nombre as string,",
+				"          Apellido as string,",
+				"          id_localidad as string",
+				"     ),",
+				"     format: 'parquet',",
+				"     partitionFileNames:['factventas_stg'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> SinkSTGFactVentas"
 			]
 		}
 	}

@@ -15,6 +15,27 @@
 			},
 			"compressionCodec": "snappy"
 		},
-		"schema": []
+		"schema": [
+			{
+				"name": "cod_tiempo",
+				"type": "INT32"
+			},
+			{
+				"name": "cod_vendedor",
+				"type": "INT32"
+			},
+			{
+				"name": "cod_cliente",
+				"type": "INT32"
+			},
+			{
+				"name": "cod_producto",
+				"type": "INT32"
+			},
+			{
+				"name": "cantidad",
+				"type": "INT32"
+			}
+		]
 	}
 }

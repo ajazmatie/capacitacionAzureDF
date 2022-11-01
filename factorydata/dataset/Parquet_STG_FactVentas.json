@@ -10,26 +10,31 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"fileName": "ventas_stg",
 				"fileSystem": "archivos-stg-jazmatie"
 			},
 			"compressionCodec": "snappy"
 		},
 		"schema": [
 			{
+				"name": "cod_tiempo",
+				"type": "INT32"
+			},
+			{
+				"name": "cod_vendedor",
+				"type": "INT32"
+			},
+			{
 				"name": "cod_cliente",
-				"type": "UTF8"
+				"type": "INT32"
 			},
 			{
-				"name": "Nombre",
-				"type": "UTF8"
+				"name": "cod_producto",
+				"type": "INT32"
 			},
 			{
-				"name": "Apellido",
-				"type": "UTF8"
-			},
-			{
-				"name": "id_localidad",
-				"type": "UTF8"
+				"name": "cantidad",
+				"type": "INT32"
 			}
 		]
 	}

@@ -48,7 +48,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> SourceDimCliente",
-				"SourceParquetVentas, SourceDimCliente lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"SourceParquetVentas, SourceDimCliente lookup(ERROR_FUNCTION('') == Cod_Cliente,",
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookupCliente",

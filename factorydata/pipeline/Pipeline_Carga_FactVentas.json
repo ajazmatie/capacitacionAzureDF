@@ -385,11 +385,11 @@
 							"type": "Int32"
 						},
 						"modulo": {
-							"value": "",
+							"value": "'Ventas'",
 							"type": "String"
 						},
 						"Proceso_ID": {
-							"value": "",
+							"value": "@variables('ProcesoID_actual')",
 							"type": "String"
 						}
 					}

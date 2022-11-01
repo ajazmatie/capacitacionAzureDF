@@ -9,33 +9,24 @@
 						"referenceName": "Parquet_STG_Ventas",
 						"type": "DatasetReference"
 					},
-					"name": "SourceParquetVentas"
-				},
-				{
-					"dataset": {
-						"referenceName": "AzureSqlCliente",
-						"type": "DatasetReference"
-					},
-					"name": "SourceDimCliente"
+					"name": "source1"
 				}
 			],
 			"sinks": [],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "lookup1"
+				}
+			],
 			"scriptLines": [
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     format: 'parquet') ~> SourceParquetVentas",
-				"source(output(",
-				"          Cod_Cliente as integer,",
-				"          Nombre_Cliente as string,",
-				"          Apellido_Cliente as string,",
-				"          Cod_Localidad as integer",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> SourceDimCliente"
+				"     format: 'parquet') ~> source1",
+				"source1 lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1"
 			]
 		}
 	}

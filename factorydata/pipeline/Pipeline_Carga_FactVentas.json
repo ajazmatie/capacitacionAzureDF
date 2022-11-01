@@ -341,11 +341,17 @@
 										"type": "Int32"
 									},
 									"modulo": {
-										"value": "@item().modulo",
+										"value": {
+											"value": "@item().modulo",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"Proceso_ID": {
-										"value": "@item().id_proceso",
+										"value": {
+											"value": "@item().id_proceso",
+											"type": "Expression"
+										},
 										"type": "Int32"
 									}
 								}
@@ -389,7 +395,10 @@
 							"type": "String"
 						},
 						"Proceso_ID": {
-							"value": "@variables('ProcesoID_actual')",
+							"value": {
+								"value": "@variables('ProcesoID_actual')",
+								"type": "Expression"
+							},
 							"type": "String"
 						}
 					}

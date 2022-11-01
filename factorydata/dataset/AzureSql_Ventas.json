@@ -2,7 +2,7 @@
 	"name": "AzureSql_Ventas",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "dbale",
+			"referenceName": "AzureSqlDatabase1",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],

@@ -8,6 +8,10 @@
 				"pipelineReference": {
 					"referenceName": "Pipeline_Carga_FactVentas",
 					"type": "PipelineReference"
+				},
+				"parameters": {
+					"fechaDesde": null,
+					"fechaHasta": null
 				}
 			}
 		],

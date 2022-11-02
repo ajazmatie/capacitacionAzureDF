@@ -1,0 +1,1144 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Nombre de instancia de Data Factory",
+			"defaultValue": "dfale"
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"accountKey\"de \"AzureDataLakeStorage1\""
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"connectionString\"de \"AzureSqlDatabase1\""
+		},
+		"dbale_connectionString": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"connectionString\"de \"dbale\""
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://caale.dfs.core.windows.net/"
+		},
+		"Job_Diario_FactVentas_properties_Pipeline_Carga_FactVentas_parameters_fechaDesde": {
+			"type": "object",
+			"defaultValue": null
+		},
+		"Job_Diario_FactVentas_properties_Pipeline_Carga_FactVentas_parameters_fechaHasta": {
+			"type": "object",
+			"defaultValue": null
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSqlDatabase1_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dbale')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('dbale_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlCliente')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Cod_Cliente",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Nombre_Cliente",
+						"type": "varchar"
+					},
+					{
+						"name": "Apellido_Cliente",
+						"type": "varchar"
+					},
+					{
+						"name": "Cod_Localidad",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Dim_Cliente"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSql_FactVentas')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "cod_tiempo",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "cod_vendedor",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "cod_cliente",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "cod_producto",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "cantidad",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Fact_Ventas"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSql_Procesos')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "id_proceso",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "modulo",
+						"type": "varchar"
+					},
+					{
+						"name": "fecha_desde_procesada",
+						"type": "date"
+					},
+					{
+						"name": "fecha_hasta_procesada",
+						"type": "date"
+					},
+					{
+						"name": "fecha_inicio_ejecucion",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "fecha_fin_ejecucion",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "estado",
+						"type": "smallint",
+						"precision": 5
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "DW_Procesos"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSql_Ventas')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "cod_tiempo",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "cod_vendedor",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "cod_cliente",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "cod_producto",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "cantidad",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "SOURCE_Ventas"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Parquet_STG_FactVentas')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "ventas_stg",
+						"fileSystem": "archivos-stg-jazmatie"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "cod_tiempo",
+						"type": "INT32"
+					},
+					{
+						"name": "cod_vendedor",
+						"type": "INT32"
+					},
+					{
+						"name": "cod_cliente",
+						"type": "INT32"
+					},
+					{
+						"name": "cod_producto",
+						"type": "INT32"
+					},
+					{
+						"name": "cantidad",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Parquet_STG_Ventas')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.SOURCE_Ventas.parquet",
+						"fileSystem": "archivos-stg-jazmatie"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "cod_tiempo",
+						"type": "INT32"
+					},
+					{
+						"name": "cod_vendedor",
+						"type": "INT32"
+					},
+					{
+						"name": "cod_cliente",
+						"type": "INT32"
+					},
+					{
+						"name": "cod_producto",
+						"type": "INT32"
+					},
+					{
+						"name": "cantidad",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "cod_tiempo",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "cod_tiempo",
+											"type": "Int32",
+											"physicalType": "INT_32"
+										}
+									},
+									{
+										"source": {
+											"name": "cod_vendedor",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "cod_vendedor",
+											"type": "Int32",
+											"physicalType": "INT_32"
+										}
+									},
+									{
+										"source": {
+											"name": "cod_cliente",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "cod_cliente",
+											"type": "Int32",
+											"physicalType": "INT_32"
+										}
+									},
+									{
+										"source": {
+											"name": "cod_producto",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "cod_producto",
+											"type": "Int32",
+											"physicalType": "INT_32"
+										}
+									},
+									{
+										"source": {
+											"name": "cantidad",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "cantidad",
+											"type": "Int32",
+											"physicalType": "INT_32"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AzureSql_Ventas",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Parquet_STG_Ventas",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSql_Ventas')]",
+				"[concat(variables('factoryId'), '/datasets/Parquet_STG_Ventas')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataFlow_STG_FactVentasSTG')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "Parquet_STG_Ventas",
+								"type": "DatasetReference"
+							},
+							"name": "sourceParquetVentas"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSqlCliente",
+								"type": "DatasetReference"
+							},
+							"name": "SourceDimCliente"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Parquet_STG_FactVentas",
+								"type": "DatasetReference"
+							},
+							"name": "SinkSTGFactVentas"
+						}
+					],
+					"transformations": [
+						{
+							"name": "lookupCliente"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          cod_tiempo as integer,",
+						"          cod_vendedor as integer,",
+						"          cod_cliente as integer,",
+						"          cod_producto as integer,",
+						"          cantidad as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> sourceParquetVentas",
+						"source(output(",
+						"          Cod_Cliente as integer,",
+						"          Nombre_Cliente as string,",
+						"          Apellido_Cliente as string,",
+						"          Cod_Localidad as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> SourceDimCliente",
+						"sourceParquetVentas, SourceDimCliente lookup(sourceParquetVentas@cod_cliente == SourceDimCliente@Cod_Cliente,",
+						"     multiple: true,",
+						"     broadcast: 'auto')~> lookupCliente",
+						"lookupCliente sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          cod_tiempo as integer,",
+						"          cod_vendedor as integer,",
+						"          cod_cliente as integer,",
+						"          cod_producto as integer,",
+						"          cantidad as integer",
+						"     ),",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     mapColumn(",
+						"          cod_tiempo,",
+						"          cod_vendedor,",
+						"          cod_cliente = sourceParquetVentas@cod_cliente,",
+						"          cod_producto,",
+						"          cantidad",
+						"     ),",
+						"     partitionBy('hash', 1)) ~> SinkSTGFactVentas"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Parquet_STG_Ventas')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSqlCliente')]",
+				"[concat(variables('factoryId'), '/datasets/Parquet_STG_FactVentas')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Pipeline_Carga_FactVentas')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup_Procesos",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Script1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT [id_proceso],[modulo], [fecha_desde_procesada],\n[fecha_hasta_procesada], [fecha_inicio_ejecucion],\n[fecha_fin_ejecucion], [estado]\nFROM [dbo].[DW_Procesos]\nWHERE [modulo] = 'Ventas' AND [estado] = 0",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSql_Procesos",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach_Proceso",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup_Procesos",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup_Procesos').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Set variable_ProcesoActual",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "idProceso_Actual",
+										"value": "string(@item().id_proceso)"
+									}
+								},
+								{
+									"name": "SP_ActualizaEstado_Iniciado",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "Set variable_ProcesoActual",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[Sp_Actualiza_Estado_Proceso]",
+										"storedProcedureParameters": {
+											"estado": {
+												"value": "1",
+												"type": "Int32"
+											},
+											"modulo": {
+												"value": {
+													"value": "@item().modulo",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"Proceso_ID": {
+												"value": {
+													"value": "@item().id_proceso",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase1",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Copy_Data_STG_Ventas",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "SP_ActualizaEstado_Iniciado",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "cod_tiempo",
+														"type": "Int32",
+														"physicalType": "int"
+													},
+													"sink": {
+														"name": "cod_tiempo",
+														"type": "Int32",
+														"physicalType": "INT_32"
+													}
+												},
+												{
+													"source": {
+														"name": "cod_vendedor",
+														"type": "Int32",
+														"physicalType": "int"
+													},
+													"sink": {
+														"name": "cod_vendedor",
+														"type": "Int32",
+														"physicalType": "INT_32"
+													}
+												},
+												{
+													"source": {
+														"name": "cod_cliente",
+														"type": "Int32",
+														"physicalType": "int"
+													},
+													"sink": {
+														"name": "cod_cliente",
+														"type": "Int32",
+														"physicalType": "INT_32"
+													}
+												},
+												{
+													"source": {
+														"name": "cod_producto",
+														"type": "Int32",
+														"physicalType": "int"
+													},
+													"sink": {
+														"name": "cod_producto",
+														"type": "Int32",
+														"physicalType": "INT_32"
+													}
+												},
+												{
+													"source": {
+														"name": "cantidad",
+														"type": "Int32",
+														"physicalType": "int"
+													},
+													"sink": {
+														"name": "cantidad",
+														"type": "Int32",
+														"physicalType": "INT_32"
+													}
+												}
+											],
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "AzureSql_Ventas",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Parquet_STG_Ventas",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								},
+								{
+									"name": "DataFlow_STG_FactVentasSTG",
+									"type": "ExecuteDataFlow",
+									"dependsOn": [
+										{
+											"activity": "Copy_Data_STG_Ventas",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataflow": {
+											"referenceName": "DataFlow_STG_FactVentasSTG",
+											"type": "DataFlowReference",
+											"parameters": {},
+											"datasetParameters": {
+												"sourceParquetVentas": {},
+												"SourceDimCliente": {},
+												"SinkSTGFactVentas": {}
+											}
+										},
+										"staging": {},
+										"compute": {
+											"coreCount": 8,
+											"computeType": "General"
+										},
+										"traceLevel": "Fine"
+									}
+								},
+								{
+									"name": "CopyData_STG_FactVentas",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "DataFlow_STG_FactVentasSTG",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "ParquetSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											}
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"preCopyScript": "delete from fact_ventas",
+											"writeBehavior": "insert",
+											"sqlWriterUseTableLock": false,
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "Parquet_STG_Ventas",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AzureSql_FactVentas",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								},
+								{
+									"name": "SP_ActualizaEstado_Exito",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "CopyData_STG_FactVentas",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[Sp_Actualiza_Estado_Proceso]",
+										"storedProcedureParameters": {
+											"estado": {
+												"value": "2",
+												"type": "Int32"
+											},
+											"modulo": {
+												"value": {
+													"value": "@item().modulo",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"Proceso_ID": {
+												"value": {
+													"value": "@item().id_proceso",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "SP_ActualizaEstado_Error",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "ForEach_Proceso",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[Sp_Actualiza_Estado_Proceso_Error]",
+							"storedProcedureParameters": {
+								"estado": {
+									"value": "3",
+									"type": "Int32"
+								},
+								"modulo": {
+									"value": "'Ventas'",
+									"type": "String"
+								},
+								"Proceso_ID": {
+									"value": {
+										"value": "@variables('idProceso_Actual')",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase1",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Script1",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase1",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"parameters": [
+										{
+											"name": "fechaDesde",
+											"type": "String",
+											"value": {
+												"value": "@pipeline().parameters.fechaDesde",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										},
+										{
+											"name": "fechaHasta",
+											"type": "String",
+											"value": {
+												"value": "@pipeline().parameters.fechaHasta",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										}
+									],
+									"type": "Query",
+									"text": {
+										"value": "INSERT INTO [dbo].[DW_Procesos] VALUES('Ventas', COALESCE(@fechaDesde, (SELECT MAX(fecha_hasta_procesada) FROM DW_Procesos WHERE modulo = 'Ventas' AND estado = 2)),\nCOALESCE(@fechaHasta, GETDATE()), GETDATE(), NULL, 0) ",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"fechaDesde": {
+						"type": "string",
+						"defaultValue": null
+					},
+					"fechaHasta": {
+						"type": "string",
+						"defaultValue": null
+					}
+				},
+				"variables": {
+					"idProceso_Actual": {
+						"type": "String",
+						"defaultValue": "\"0\""
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSql_Procesos')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSql_Ventas')]",
+				"[concat(variables('factoryId'), '/datasets/Parquet_STG_Ventas')]",
+				"[concat(variables('factoryId'), '/dataflows/DataFlow_STG_FactVentasSTG')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSql_FactVentas')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Job_Diario_FactVentas')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Pipeline_Carga_FactVentas",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"fechaDesde": "[parameters('Job_Diario_FactVentas_properties_Pipeline_Carga_FactVentas_parameters_fechaDesde')]",
+							"fechaHasta": "[parameters('Job_Diario_FactVentas_properties_Pipeline_Carga_FactVentas_parameters_fechaHasta')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-11-02T00:57:00",
+						"timeZone": "Argentina Standard Time",
+						"schedule": {
+							"minutes": [
+								3
+							],
+							"hours": [
+								12
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Pipeline_Carga_FactVentas')]"
+			]
+		}
+	]
+}

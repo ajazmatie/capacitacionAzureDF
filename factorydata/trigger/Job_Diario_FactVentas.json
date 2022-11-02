@@ -16,14 +16,14 @@
 			"recurrence": {
 				"frequency": "Day",
 				"interval": 1,
-				"startTime": "2022-11-03T00:57:00",
+				"startTime": "2022-11-02T00:57:00",
 				"timeZone": "Argentina Standard Time",
 				"schedule": {
 					"minutes": [
-						0
+						2
 					],
 					"hours": [
-						3
+						12
 					]
 				}
 			}

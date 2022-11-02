@@ -467,10 +467,12 @@
 		],
 		"parameters": {
 			"fechaDesde": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": null
 			},
 			"fechaHasta": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": null
 			}
 		},
 		"variables": {

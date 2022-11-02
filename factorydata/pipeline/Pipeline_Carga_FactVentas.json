@@ -5,7 +5,14 @@
 			{
 				"name": "Lookup_Procesos",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Script1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -18,7 +25,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "SELECT [modulo], [fecha_desde_procesada],\n[fecha_hasta_procesada], [fecha_inicio_ejecucion],\n[fecha_fin_ejecucion], [estado]\nFROM [dbo].[DW_Procesos]\nWHERE [modulo] = 'Ventas' AND [estado] = 0",
+							"value": "SELECT [id_proceso],[modulo], [fecha_desde_procesada],\n[fecha_hasta_procesada], [fecha_inicio_ejecucion],\n[fecha_fin_ejecucion], [estado]\nFROM [dbo].[DW_Procesos]\nWHERE [modulo] = 'Ventas' AND [estado] = 0",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -396,7 +403,7 @@
 						},
 						"Proceso_ID": {
 							"value": {
-								"value": "@variables('ProcesoID_actual')",
+								"value": "@variables('idProceso_Actual')",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -407,8 +414,65 @@
 					"referenceName": "AzureSqlDatabase1",
 					"type": "LinkedServiceReference"
 				}
+			},
+			{
+				"name": "Script1",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"parameters": [
+								{
+									"name": "fechaDesde",
+									"type": "String",
+									"value": {
+										"value": "@pipeline().parameters.fechaDesde",
+										"type": "Expression"
+									},
+									"direction": "Input"
+								},
+								{
+									"name": "fechaHasta",
+									"type": "String",
+									"value": {
+										"value": "@pipeline().parameters.fechaHasta",
+										"type": "Expression"
+									},
+									"direction": "Input"
+								}
+							],
+							"type": "Query",
+							"text": {
+								"value": "INSERT INTO [dbo].[DW_Procesos] VALUES('Ventas', COALESCE(@fechaDesde, (SELECT MAX(fecha_hasta_procesada) FROM DW_Procesos WHERE modulo = 'Ventas' AND estado = 2)),\nCOALESCE(@fechaHasta, GETDATE()), GETDATE(), NULL, 0) ",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
 			}
 		],
+		"parameters": {
+			"fechaDesde": {
+				"type": "string"
+			},
+			"fechaHasta": {
+				"type": "string"
+			}
+		},
 		"variables": {
 			"idProceso_Actual": {
 				"type": "String",

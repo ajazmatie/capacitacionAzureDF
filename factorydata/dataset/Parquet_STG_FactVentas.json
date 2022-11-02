@@ -1,0 +1,41 @@
+{
+	"name": "Parquet_STG_FactVentas",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "ventas_stg",
+				"fileSystem": "archivos-stg-jazmatie"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "cod_tiempo",
+				"type": "INT32"
+			},
+			{
+				"name": "cod_vendedor",
+				"type": "INT32"
+			},
+			{
+				"name": "cod_cliente",
+				"type": "INT32"
+			},
+			{
+				"name": "cod_producto",
+				"type": "INT32"
+			},
+			{
+				"name": "cantidad",
+				"type": "INT32"
+			}
+		]
+	}
+}

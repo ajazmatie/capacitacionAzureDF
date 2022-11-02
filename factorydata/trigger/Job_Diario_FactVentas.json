@@ -1,0 +1,36 @@
+{
+	"name": "Job_Diario_FactVentas",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Pipeline_Carga_FactVentas",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"fechaDesde": null,
+					"fechaHasta": null
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-11-02T00:57:00",
+				"timeZone": "Argentina Standard Time",
+				"schedule": {
+					"minutes": [
+						3
+					],
+					"hours": [
+						12
+					]
+				}
+			}
+		}
+	}
+}

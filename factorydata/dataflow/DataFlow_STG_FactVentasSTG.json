@@ -1,0 +1,87 @@
+{
+	"name": "DataFlow_STG_FactVentasSTG",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Parquet_STG_Ventas",
+						"type": "DatasetReference"
+					},
+					"name": "sourceParquetVentas"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlCliente",
+						"type": "DatasetReference"
+					},
+					"name": "SourceDimCliente"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Parquet_STG_FactVentas",
+						"type": "DatasetReference"
+					},
+					"name": "SinkSTGFactVentas"
+				}
+			],
+			"transformations": [
+				{
+					"name": "lookupCliente"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          cod_tiempo as integer,",
+				"          cod_vendedor as integer,",
+				"          cod_cliente as integer,",
+				"          cod_producto as integer,",
+				"          cantidad as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> sourceParquetVentas",
+				"source(output(",
+				"          Cod_Cliente as integer,",
+				"          Nombre_Cliente as string,",
+				"          Apellido_Cliente as string,",
+				"          Cod_Localidad as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> SourceDimCliente",
+				"sourceParquetVentas, SourceDimCliente lookup(sourceParquetVentas@cod_cliente == SourceDimCliente@Cod_Cliente,",
+				"     multiple: true,",
+				"     broadcast: 'auto')~> lookupCliente",
+				"lookupCliente sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          cod_tiempo as integer,",
+				"          cod_vendedor as integer,",
+				"          cod_cliente as integer,",
+				"          cod_producto as integer,",
+				"          cantidad as integer",
+				"     ),",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          cod_tiempo,",
+				"          cod_vendedor,",
+				"          cod_cliente = sourceParquetVentas@cod_cliente,",
+				"          cod_producto,",
+				"          cantidad",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> SinkSTGFactVentas"
+			]
+		}
+	}
+}

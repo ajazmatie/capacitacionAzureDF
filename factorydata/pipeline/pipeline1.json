@@ -1,9 +1,9 @@
 {
-	"name": "Pipeline_CargaDimCliente",
+	"name": "pipeline1",
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy data_CSV_Parquet",
+				"name": "Copy data1",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -16,15 +16,9 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
@@ -41,50 +35,62 @@
 						"mappings": [
 							{
 								"source": {
+									"name": "cod_tiempo",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "cod_tiempo",
+									"type": "Int32",
+									"physicalType": "INT_32"
+								}
+							},
+							{
+								"source": {
+									"name": "cod_vendedor",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "cod_vendedor",
+									"type": "Int32",
+									"physicalType": "INT_32"
+								}
+							},
+							{
+								"source": {
 									"name": "cod_cliente",
-									"type": "String",
-									"physicalType": "String"
+									"type": "Int32",
+									"physicalType": "int"
 								},
 								"sink": {
 									"name": "cod_cliente",
-									"type": "String",
-									"physicalType": "UTF8"
+									"type": "Int32",
+									"physicalType": "INT_32"
 								}
 							},
 							{
 								"source": {
-									"name": "Nombre",
-									"type": "String",
-									"physicalType": "String"
+									"name": "cod_producto",
+									"type": "Int32",
+									"physicalType": "int"
 								},
 								"sink": {
-									"name": "Nombre",
-									"type": "String",
-									"physicalType": "UTF8"
+									"name": "cod_producto",
+									"type": "Int32",
+									"physicalType": "INT_32"
 								}
 							},
 							{
 								"source": {
-									"name": "Apellido",
-									"type": "String",
-									"physicalType": "String"
+									"name": "cantidad",
+									"type": "Int32",
+									"physicalType": "int"
 								},
 								"sink": {
-									"name": "Apellido",
-									"type": "String",
-									"physicalType": "UTF8"
-								}
-							},
-							{
-								"source": {
-									"name": "id_localidad",
-									"type": "String",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "id_localidad",
-									"type": "String",
-									"physicalType": "UTF8"
+									"name": "cantidad",
+									"type": "Int32",
+									"physicalType": "INT_32"
 								}
 							}
 						],
@@ -97,13 +103,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "Cliente_CSV",
+						"referenceName": "AzureSql_Ventas",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "Parquet_Cliente_stg",
+						"referenceName": "Parquet_STG_Ventas",
 						"type": "DatasetReference"
 					}
 				]
